@@ -1,41 +1,51 @@
-$(function() {
-    // init the validator
-    // validator files are included in the download package
-    // otherwise download from http://1000hz.github.io/bootstrap-validator
+var form = $('#contact'),
+    submit = form.find('[name="submit"]');
+
+form.on('submit', function(e) {
+  e.preventDefault();
   
-    $("#contact-form").validator();
+  // avoid spamming buttons
+  if (submit.attr('value') !== 'Send')
+    return;
   
-    // when the form is submitted
-    $("#contact-form").on("submit", function(e) {
-      // if the validator does not prevent form submit
-      if (!e.isDefaultPrevented()) {
-        var url = "contact.php";
-  
-        // FOR CODEPEN DEMO I WILL PROVIDE THE DEMO OUTPUT HERE, download the PHP files from
-        // https://bootstrapious.com/p/how-to-build-a-working-bootstrap-contact-form
-  
-        var messageAlert = "alert-success";
-        var messageText =
-          "Your message was sent, thank you. I will get back to you soon.";
-  
-        // let's compose Bootstrap alert box HTML
-        var alertBox =
-          '<div class="alert ' +
-          messageAlert +
-          ' alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>' +
-          messageText +
-          "</div>";
-  
-        // If we have messageAlert and messageText
-        if (messageAlert && messageText) {
-          // inject the alert to .messages div in our form
-          $("#contact-form").find(".messages").html(alertBox);
-          // empty the form
-          $("#contact-form")[0].reset();
-        }
-  
-        return false;
-      }
-    });
+  var valid = true;
+  form.find('input, textarea').removeClass('invalid').each(function() {
+    if (!this.value) {
+      $(this).addClass('invalid');
+      valid = false;
+    }
   });
   
+  if (!valid) {
+    form.animate({left: '-3em'},  50)
+        .animate({left:  '3em'}, 100)
+        .animate({left:    '0'},  50);
+  } else {
+    submit.attr('value', 'Sending...')
+          .css({boxShadow: '0 0 200em 200em rgba(225, 225, 225, 0.6)',
+                backgroundColor: '#ccc'});
+    // simulate AJAX response
+    setTimeout(function() {
+      // step 1: slide labels and inputs
+      // when AJAX responds with success
+      // no animation for AJAX failure yet
+      form.find('label')
+          .animate({left: '100%'}, 500)
+          .animate({opacity: '0'}, 500);
+    }, 1000);
+    setTimeout(function() {
+      // step 2: show thank you message after step 1
+      submit.attr('value', 'Thank you :)')
+            .css({boxShadow: 'none'});
+    }, 2000);
+    setTimeout(function() {
+      // step 3: reset
+      form.find('input, textarea').val('');
+      form.find('label')
+          .css({left: '0'})
+          .animate({opacity: '1'}, 500);
+      submit.attr('value', 'Send')
+            .css({backgroundColor: ''});
+    }, 4000);
+  }
+});
